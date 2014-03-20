@@ -1248,16 +1248,26 @@
     // Make the request, allowing the user to override any Ajax options.
     var xhr = options.xhr = ajax(_.extend(params, options));
 
+    model.trigger('request', model, xhr, options);
+
+    var success = options.success;
     var error = options.error;
-    xhr.then(options.success, function(xhr, textStatus, errorThrown) {
+    var that = this; // actually needed?
+
+    // pipe the results through "then", to gurarantee that
+    // options.success and options.error are called before
+    // the returned promise resolves. This gives the
+    // collections/models a chance to update first.
+    return xhr.then(function() {
+        success.apply(that, arguments);
+        return thenArgs(arguments);
+    }, function(xhr, textStatus, errorThrown) {
       // Pass along `textStatus` and `errorThrown` from jQuery.
       options.textStatus = textStatus;
       options.errorThrown = errorThrown;
-      if (error) error.apply(this, arguments);
+      if (error) error.apply(that, arguments);
+      return failArgs(arguments);
     });
-
-    model.trigger('request', model, xhr, options);
-    return xhr;
   };
 
   var noXhrPatch =
@@ -1699,6 +1709,14 @@
       if (error) error(model, resp, options);
       model.trigger('error', model, resp, options);
     };
+  };
+
+  var thenArgs = function() {
+      return $.Deferred().resolve(arguments);
+  };
+
+  var failArgs = function() {
+      return $.Deferred().reject(arguments);
   };
 
   return Backbone;
