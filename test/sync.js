@@ -215,7 +215,11 @@
       strictEqual(options.textStatus, 'textStatus');
       strictEqual(options.errorThrown, 'errorThrown');
     });
-    var rawDeferred = model.fetch();
-    rawDeferred.reject(rawDeferred, 'textStatus', 'errorThrown');
+    model.fetch({
+        ajax: function() {
+          var dfd = $.Deferred();
+          return dfd.reject(dfd.promise(), 'textStatus', 'errorThrown');
+        }
+    });
   });
 })();
