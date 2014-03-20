@@ -1184,8 +1184,19 @@
       };
     }
 
+    // Pass along `textStatus` and `errorThrown` from jQuery.
+    var error = options.error;
+    options.error = function(xhr, textStatus, errorThrown) {
+      options.textStatus = textStatus;
+      options.errorThrown = errorThrown;
+      if (error) error.apply(this, arguments);
+    };
+
+    // Allow one-time override of the ajax function.
+    var ajax = options.ajax || Backbone.ajax;
+
     // Make the request, allowing the user to override any Ajax options.
-    var xhr = options.xhr = Backbone.ajax(_.extend(params, options));
+    var xhr = options.xhr = ajax(_.extend(params, options));
     model.trigger('request', model, xhr, options);
     return xhr;
   };
