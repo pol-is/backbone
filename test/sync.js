@@ -147,6 +147,7 @@
   test("Backbone.ajax", 1, function() {
     Backbone.ajax = function(settings){
       strictEqual(settings.url, '/test');
+      return $.Deferred();
     };
     var model = new Backbone.Model();
     model.url = '/test';
@@ -214,8 +215,8 @@
       strictEqual(options.textStatus, 'textStatus');
       strictEqual(options.errorThrown, 'errorThrown');
     });
-    model.fetch();
-    this.ajaxSettings.error({}, 'textStatus', 'errorThrown');
+    var rawDeferred = model.fetch();
+    rawDeferred.reject(rawDeferred, 'textStatus', 'errorThrown');
   });
 
 })();
