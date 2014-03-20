@@ -770,7 +770,7 @@
   test("#1412 - Trigger 'request' and 'sync' events.", 4, function() {
     var collection = new Backbone.Collection;
     collection.url = '/test';
-    Backbone.ajax = function(settings){ settings.success(); };
+    Backbone.ajax = function(settings){ return $.Deferred().resolve(); };
 
     collection.on('request', function(obj, xhr, options) {
       ok(obj === collection, "collection has correct 'request' event after fetching");
@@ -1137,8 +1137,9 @@
     }));
     var ajax = Backbone.ajax;
     Backbone.ajax = function (params) {
-      _.defer(params.success);
-      return {someHeader: 'headerValue'};
+      var dfd = $.Deferred();
+      _.defer(dfd.resolve);
+      return $.extend({someHeader: 'headerValue'}, dfd);
     };
     collection.fetch({
       success: function () { start(); }

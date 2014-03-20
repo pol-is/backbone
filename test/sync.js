@@ -147,6 +147,7 @@
   test("Backbone.ajax", 1, function() {
     Backbone.ajax = function(settings){
       strictEqual(settings.url, '/test');
+      return $.Deferred();
     };
     var model = new Backbone.Model();
     model.url = '/test';
@@ -207,4 +208,14 @@
     strictEqual(this.ajaxSettings.beforeSend(xhr), false);
   });
 
+  test('#2928 - Pass along `textStatus` and `errorThrown`.', 2, function() {
+    var model = new Backbone.Model;
+    model.url = '/test';
+    model.on('error', function(model, xhr, options) {
+      strictEqual(options.textStatus, 'textStatus');
+      strictEqual(options.errorThrown, 'errorThrown');
+    });
+    var rawDeferred = model.fetch();
+    rawDeferred.reject(rawDeferred, 'textStatus', 'errorThrown');
+  });
 })();
